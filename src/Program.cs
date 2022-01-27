@@ -33,7 +33,9 @@ namespace MobilePatcher
                 return;
             }
 
-            var method = FindMethod(module, "Discord.API", "DiscordSocketApiClient", "MoveNext", "<SendIdentifyAsync>d__32");
+            var method = FindMethod(module, "Discord.API", "DiscordSocketApiClient", "MoveNext", "<SendIdentifyAsync>d__32")
+                         ?? FindMethod(module, "Discord.API", "DiscordSocketApiClient", "MoveNext", "<SendIdentifyAsync>d__33");
+
             if (method is null)
             {
                 Console.WriteLine("Could not find method SendIdentifyAsync.");
@@ -47,7 +49,7 @@ namespace MobilePatcher
                 return;
             }
 
-            Console.WriteLine("Patching Discord.Net.WebSocket.dll ...");
+            Console.WriteLine("Patching Discord.Net.WebSocket.dll...");
 
             var setItemInstruction = instructions.FirstOrDefault(x =>
                 x.OpCode == OpCodes.Callvirt &&
