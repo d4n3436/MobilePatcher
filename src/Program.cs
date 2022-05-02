@@ -51,7 +51,7 @@ namespace MobilePatcher
 
             Console.WriteLine("Patching Discord.Net.WebSocket.dll...");
 
-            var setItemInstruction = instructions.FirstOrDefault(x =>
+            var setItemInstruction = instructions.LastOrDefault(x =>
                 x.OpCode == OpCodes.Callvirt &&
                 x.Operand is MemberRef memberRef &&
                 memberRef.Name == "set_Item" &&
@@ -64,7 +64,7 @@ namespace MobilePatcher
             }
 
             int index = instructions.IndexOf(setItemInstruction);
-            if (instructions[index - 1].Operand is not string strOperand || !strOperand.StartsWith("Discord.Net") || instructions[index - 2].Operand is not "$device")
+            if (instructions[index - 1].Operand is not string strOperand || !strOperand.StartsWith("Discord.Net") || instructions[index - 2].Operand is not string op || !op.Contains("browser"))
             {
                 Console.WriteLine("Method set_Item is not setting the expected values, something has changed in SendIdentifyAsync.");
                 return;
@@ -77,7 +77,7 @@ namespace MobilePatcher
             instructions.Insert(++index, new Instruction(OpCodes.Dup));
             instructions.Insert(++index, new Instruction(OpCodes.Ldstr, "$browser"));
             instructions.Insert(++index, new Instruction(OpCodes.Ldstr, "Discord Android"));
-            instructions.Insert(++index, new Instruction(OpCodes.Callvirt, setItemInstruction.Operand));
+            instructions.Insert(index + 1, new Instruction(OpCodes.Callvirt, setItemInstruction.Operand));
 
             Console.WriteLine("Creating backup of Discord.Net.WebSocket.dll");
             try
