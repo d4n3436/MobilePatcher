@@ -84,7 +84,7 @@ This tells Discord that you're using the Android client.
 
 - Now your bot will have the mobile status :)
 
-  ![Mobile status](https://cdn.discordapp.com/attachments/838832564583661638/874020734035427358/unknown.png)
+  ![Mobile status](images/mobile-status.png)
 
 ## Notes
 
