@@ -38,28 +38,28 @@ This tells Discord that you're using the Android client.
 
 - Add the following class to your project:
   ```c#
-  using System.Reflection;
-  using Discord.WebSocket;
-  using HarmonyLib;
-
+  /// <summary>
+  /// Represents the mobile patcher.
+  /// </summary>
   public static class MobilePatcher
   {
-      public static void Patch()
-      {
-          var harmony = new Harmony(nameof(MobilePatcher));
-  
-          var original = AccessTools.Method("Discord.API.DiscordSocketApiClient:SendGatewayAsync");
-          var prefix = typeof(MobilePatcher).GetMethod(nameof(Prefix));
-  
-          harmony.Patch(original, new HarmonyMethod(prefix));
-      }
-  
       private static readonly Type _identifyParams =
           typeof(BaseSocketClient).Assembly.GetType("Discord.API.Gateway.IdentifyParams", true)!;
   
       private static readonly PropertyInfo? _property = _identifyParams.GetProperty("Properties");
   
-      public static void Prefix(in byte opCode, in object payload)
+      /// <summary>
+      /// Patches Discord.Net to display the mobile status.
+      /// </summary>
+      public static void Patch()
+      {
+          var harmony = new Harmony(nameof(MobilePatcher));
+          var original = AccessTools.Method("Discord.API.DiscordSocketApiClient:SendGatewayAsync");
+  
+          harmony.Patch(original, new HarmonyMethod(Prefix));
+      }
+  
+      private static void Prefix(byte opCode, object payload)
       {
           if (opCode != 2) // Identify
               return;
@@ -70,7 +70,9 @@ This tells Discord that you're using the Android client.
           if (_property?.GetValue(payload) is not IDictionary<string, string> props
               || !props.TryGetValue("$device", out string? device)
               || device != "Discord.Net")
+          {
               return;
+          }
   
           props["$os"] = "android";
           props["$browser"] = "Discord Android";
@@ -85,5 +87,6 @@ This tells Discord that you're using the Android client.
   ![Mobile status](https://cdn.discordapp.com/attachments/838832564583661638/874020734035427358/unknown.png)
 
 ## Notes
+
 
 - The mobile status is only displayed when the bot's status is Online.
